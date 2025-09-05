@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - Bazara Tech Market</title>
+    <script src="script.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-bg: #f4f4f4;
+            --secondary-bg: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #666666;
+            --accent: #000000;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 90px;
+        }
+
+        /* Slider Advertisement */
+        .slider-container {
+            position: relative;
+            height: 400px;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .slide:nth-child(1) {
+            background-color: #3498db;
+            background-image: linear-gradient(120deg, #3498db, #2980b9);
+        }
+
+        .slide:nth-child(2) {
+            background-color: #e74c3c;
+            background-image: linear-gradient(120deg, #e74c3c, #c0392b);
+        }
+
+        .slide:nth-child(3) {
+            background-color: #2ecc71;
+            background-image: linear-gradient(120deg, #2ecc71, #27ae60);
+        }
+
+        .slide-content {
+            padding: 20px;
+            max-width: 80%;
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .slide p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .slide-btn {
+            display: inline-block;
+            background-color: white;
+            color: var(--accent);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .slide-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .slider-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .slider-dot.active {
+            background-color: white;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Product Shelves */
+        .product-shelf {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .shelf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .shelf-header h2 {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .view-all {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .view-all:hover {
+            color: var(--accent);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: var(--primary-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-specs {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            background-color: #333;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--secondary-bg);
+            padding: 3rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .shelf-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .view-all {
+                margin-top: 0.5rem;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .slider-container {
+                height: 300px;
+            }
+
+            .slide h2 {
+                font-size: 1.8rem;
+            }
+
+            .slide p {
+                font-size: 1rem;
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-menu a {
+                margin-left: 12px;
+                font-size: 0.9rem;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .product-info {
+                padding: 1rem;
+            }
+
+            .product-title {
+                font-size: 0.9rem;
+            }
+
+            .product-specs {
+                font-size: 0.8rem;
+            }
+
+            .product-price {
+                font-size: 1.1rem;
+            }
+
+            .add-to-cart {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            .slider-container {
+                height: 220px;
+            }
+
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+
+            .slide p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="bazara-about-page.html">
+                <img src="../public/images/logo4.png" alt="Bazara Logo" class="logo" width="55" height="auto">
+            </a>
+            <nav class="nav-menu">
+                <a href="../src/auth/login-page.html" id="login">Log In</a>
+                <a href="../src/auth/signup-page.html" class="signup">Sign Up</a>
+                <a href="../src/pages/cart-page.html" class="cart-icon">
+                    Cart
+                    <span class="cart-count">2</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <!-- Advertisement Slider -->
+        <div class="slider-container">
+            <div class="slider">
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>New MacBook Pro</h2>
+                        <p>Experience next-level performance with the latest M3 chip.</p>
+                        <a href="#" class="slide-btn">Shop Now</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>iPhone 16 Series</h2>
+                        <p>Discover innovation beyond imagination. Now available!</p>
+                        <a href="#" class="slide-btn">Learn More</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>Gaming Season Sale</h2>
+                        <p>Up to 30% off on selected gaming laptops and consoles.</p>
+                        <a href="#" class="slide-btn">View Deals</a>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-nav">
+                <div class="slider-dot active"></div>
+                <div class="slider-dot"></div>
+                <div class="slider-dot"></div>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h1>Explore Our Tech Collection</h1>
+            <p>Discover the latest and greatest in technology across multiple categories. Find your perfect device today.</p>
+        </div>
+
+        <!-- Laptops Shelf -->
+        <section class="product-shelf">
+            <div class="shelf-header">
+                <h2>Laptops</h2>
+                <a href="laptop-page.html" class="view-all">View All Laptops</a>
+            </div>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="Asus.png" alt="Gaming Laptop" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">ASUS ROG Gaming Laptop</h3>
+                        <p class="product-specs">RTX 4080 • 32GB RAM • 1TB SSD</p>
+                        <p class="product-price">R20,499</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="Macbook.png" alt="Ultrabook" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">MacBook Pro 14"</h3>
+                        <p class="product-specs">M3 Chip • 16GB • 512GB SSD</p>
+                        <p class="product-price">R29,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="DellAspiron.png" alt="Business Laptop" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Dell XPS 15</h3>
+                        <p class="product-specs">Intel i7 • 16GB • 1TB SSD</p>
+                        <p class="product-price">R24,599</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="LenovoLaptopi5.png" alt="Chromebook" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Lenovo Chromebook</h3>
+                        <p class="product-specs">Intel Celeron • 4GB • 64GB</p>
+                        <p class="product-price">R5,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smartphones Shelf -->
+        <section class="product-shelf">
+            <div class="shelf-header">
+                <h2>Smartphones</h2>
+                <a href="smartphone-page.html" class="view-all">View All Smartphones</a>
+            </div>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="Iphone16.png" alt="Smartphone" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">iPhone 16</h3>
+                        <p class="product-specs">A17 Pro • 256GB • 6.7" Display</p>
+                        <p class="product-price">R14,199</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="sumsungS25.jpg" alt="Android Flagship" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Samsung Galaxy S23 Ultra</h3>
+                        <p class="product-specs">Snapdragon 8 Gen 2 • 512GB</p>
+                        <p class="product-price">R18,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="GooglePixel7.png" alt="Mid-range Phone" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Google Pixel 7</h3>
+                        <p class="product-specs">Tensor G2 • 128GB • 6.3" Display</p>
+                        <p class="product-price">R9,799</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="XiaomiRedmiNote12.png" alt="Budget Phone" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Xiaomi Redmi Note 12</h3>
+                        <p class="product-specs">Snapdragon 685 • 128GB • 6.67"</p>
+                        <p class="product-price">R4,599</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gaming Shelf -->
+        <section class="product-shelf">
+            <div class="shelf-header">
+                <h2>Gaming</h2>
+                <a href="gaming-page.html" class="view-all">View All Gaming</a>
+            </div>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="PS5.png" alt="Gaming Console" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">PS5 Digital Edition</h3>
+                        <p class="product-specs">825GB SSD • 4K • 120fps</p>
+                        <p class="product-price">R14,099</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="Xboxseries.png" alt="Xbox Console" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Xbox Series X</h3>
+                        <p class="product-specs">1TB SSD • 4K • Ray Tracing</p>
+                        <p class="product-price">R15,299</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="AsusGamingDesktop.png" alt="Gaming Laptop" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Razer Blade 15</h3>
+                        <p class="product-specs">RTX 3070 • 16GB • 1TB SSD</p>
+                        <p class="product-price">R39,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="LGmonitor.png" alt="Gaming Monitor" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">LG UltraGear</h3>
+                        <p class="product-specs">27" • 144Hz • 1ms • QHD</p>
+                        <p class="product-price">R4,799</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accessories Shelf -->
+        <section class="product-shelf">
+            <div class="shelf-header">
+                <h2>Accessories</h2>
+                <a href="#" class="view-all">View All Accessories</a>
+            </div>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="AirPodsPro(2ndGen).png" alt="Wireless Earbuds" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">AirPods Pro (2nd Gen)</h3>
+                        <p class="product-specs">Active Noise Cancellation • Wireless</p>
+                        <p class="product-price">R4,799</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="SteelSeriesArctisPro.png" alt="Gaming Headset" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">SteelSeries Arctis Pro</h3>
+                        <p class="product-specs">Wireless • DTS • RGB Lighting</p>
+                        <p class="product-price">R3,299</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="Anker747GaNPrime.png" alt="Smartphone Charger" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Anker 747 GaNPrime</h3>
+                        <p class="product-specs">100W • 3 Ports • USB-C</p>
+                        <p class="product-price">R1,599</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="PeakDesignEveryday.png" alt="Laptop Backpack" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Peak Design Everyday</h3>
+                        <p class="product-specs">20L • Weatherproof • Laptop Sleeve</p>
+                        <p class="product-price">R2,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="#">Laptops</a></li>
+                    <li><a href="#">Smartphones</a></li>
+                    <li><a href="#">Gaming</a></li>
+                    <li><a href="#">Accessories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="contact-page.html">Contact Us</a></li>
+                    <li><a href="returns-policy.html">Returns</a></li>
+                    <li><a href="warrantypage.html">Warranty</a></li>
+                    <li><a href="faqs.html">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="terms-of-service.html">Terms of Service</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Slider functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.querySelector('.slider');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.slider-dot');
+            const slideWidth = slider.clientWidth;
+            let currentIndex = 0;
+
+            // Set initial position
+            updateSlider();
+
+            // Set up dots functionality
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateSlider();
+                });
+            });
+
+            // Auto-rotate slides
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % slides.length;
+                updateSlider();
+            }, 5000);
+
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Update active dot
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

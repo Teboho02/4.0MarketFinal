@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs - Bazara Tech Market</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-bg: #f4f4f4;
+            --secondary-bg: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #666666;
+            --accent: #000000;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .header {
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .main-content {
+            margin-top: 90px;
+            padding: 2rem 0;
+        }
+
+        .faqs-section {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faqs-section h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .faq-category {
+            margin-bottom: 2rem;
+        }
+
+        .faq-category h2 {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .faq-item {
+            background-color: var(--primary-bg);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            cursor: pointer;
+            background-color: var(--secondary-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: #f9f9f9;
+        }
+
+        .faq-question h3 {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 1rem;
+            background-color: var(--primary-bg);
+            color: var(--text-secondary);
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .faqs-section {
+                padding: 1.5rem;
+            }
+
+            .faqs-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="bazara-about-page.html">
+                <img src="logo4.png" alt="Bazara Logo" class="logo" width="65" height="auto">
+            </a>
+            <nav class="nav-menu">
+                <a href="#">Home</a>
+                <a href="#">Laptops</a>
+                <a href="#">Smartphones</a>
+                <a href="#">Gaming</a>
+                <a href="#" class="cart-icon">
+                    Cart
+                    <span class="cart-count">0</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="faqs-section">
+            <h1>Frequently Asked Questions</h1>
+
+            <div class="faq-category">
+                <h2>Ordering & Shipping</h2>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How long does shipping take?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Standard shipping typically takes 3-5 business days within the continental United States. Expedited shipping options are available at checkout for faster delivery. International shipping times may vary depending on the destination.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do you ship internationally?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, we offer international shipping to select countries. Shipping rates and delivery times vary by destination. During checkout, you can enter your address to see available shipping options and estimated delivery dates.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-category">
+                <h2>Product Information</h2>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do you offer product warranties?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Most products come with a manufacturer's warranty. Typical warranty periods range from 1-2 years depending on the product type. Specific warranty details are provided with each product and can also be found in the product documentation.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Can I customize my product?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We offer customization options for select products, particularly laptops and gaming systems. During the checkout process, you can choose different specifications like RAM, storage, and processor. Custom-configured products may have different return policies.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-category">
+                <h2>Returns & Support</h2>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How do I return a product?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>To initiate a return, visit our Returns page or contact customer support to obtain a Return Merchandise Authorization (RMA) number. Products must be returned within 30 days, in original packaging, and in new condition. Shipping costs for returns are the customer's responsibility unless the item is defective.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How can I contact customer support?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can reach our customer support team via email at support@bazara.tech or by phone at +1 (555) 123-4567. Our support hours are Monday - Friday, 9 AM - 6 PM PST. For quick answers, check our support sections or submit an inquiry through our Contact Us page.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-category">
+                <h2>Payment & Security</h2>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What payment methods do you accept?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We accept major credit cards (Visa, MasterCard, American Express), PayPal, and Apple Pay. All transactions are secured with encrypted payment gateways to protect your financial information.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Is my personal information safe?</h3>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We take data privacy seriously. Our website uses SSL encryption, and we comply with international data protection regulations. We never sell personal information to third parties and use advanced security measures to protect your data.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="#">Laptops</a></li>
+                    <li><a href="#">Smartphones</a></li>
+                    <li><a href="#">Gaming</a></li>
+                    <li><a href="#">Accessories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Returns</a></li>
+                    <li><a href="#">Warranty</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', () => {
+                    const faqItem = question.parentElement;
+                    faqItem.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

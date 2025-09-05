@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Bazara Tech Market</title>
+    <script src="./login.js" defer></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-bg: #f4f4f4;
+            --secondary-bg: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #666666;
+            --accent: #000000;
+            --border-color: #e0e0e0;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 90px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        /* Login Form */
+        .login-container {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+
+        .forgot-password {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #333;
+        }
+
+        .or-divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .or-divider::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+
+        .or-divider::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .social-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .signup-link {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .signup-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Message */
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--error-color);
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--secondary-bg);
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 1.5rem;
+                max-width: 90%;
+            }
+
+            .social-login {
+                flex-wrap: wrap;
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-menu a {
+                margin-left: 12px;
+                font-size: 0.9rem;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .social-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .social-btn img {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="responsive-shop-page.html">
+                <img src="logo4.png" alt="Bazara Logo" class="logo" width="65" height="auto">
+            </a>
+            <nav class="nav-menu">
+                <a href="#" class="active">Log In</a>
+                <a href="signup-page.html">Sign Up</a>
+                <a href="cart-page.html" class="cart-icon">
+                    Cart
+                    <span class="cart-count">2</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your Bazara account</p>
+            </div>
+            
+            <div class="error-message" id="error-message">
+                Invalid email or password. Please try again.
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="login-btn">Log In</button>
+            </form>
+            
+            <div class="or-divider">OR</div>
+            
+            <div class="social-login">
+                <button class="social-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.283 10.356h-8.327v3.451h4.792c-.446 2.193-2.313 3.453-4.792 3.453a5.27 5.27 0 0 1-5.279-5.28 5.27 5.27 0 0 1 5.279-5.279c1.259 0 2.397.447 3.29 1.178l2.6-2.599c-1.584-1.381-3.615-2.233-5.89-2.233a8.908 8.908 0 0 0-8.934 8.934 8.907 8.907 0 0 0 8.934 8.934c4.467 0 8.529-3.249 8.529-8.934 0-.528-.081-1.097-.202-1.625z" fill="#4285F4"/>
+                        <path d="M4.17 14.982l3.07-2.4c-.736-1.045-1.157-2.215-1.157-3.593a5.252 5.252 0 0 1 1.3-3.3l-3.28-2.518C2.618 5.09 1.89 7.08 1.89 9.26c0 2.19.728 4.191 2.28 5.722z" fill="#34A853"/>
+                        <path d="M12.207 3.059c1.513 0 2.878.524 3.957 1.458l2.698-2.614C17.023.453 14.755 0 12.207 0 8.055 0 4.79 1.726 3.046 4.243l3.195 2.485c.765-2.069 2.86-3.67 5.966-3.67z" fill="#EA4335"/>
+                        <path d="M12.207 18.524c2.646 0 4.943-1.557 6.097-3.31l-2.756-2.132c-.81.701-1.84 1.097-3.34 1.097-2.601 0-4.513-1.607-5.254-3.585l-3.18 2.447c1.691 3.344 5.18 5.483 9.433 5.483z" fill="#FBBC05"/>
+                    </svg>
+                </button>
+                <button class="social-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+                    </svg>
+                </button>
+                <button class="social-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.638 10.929c.144.645.219 1.298.219 1.923 0 5.205-3.437 8.901-8.644 8.901-4.964 0-9-4.037-9-9s4.036-9 9-9c2.363 0 4.439.899 6.006 2.364l-2.435 2.435c-2.386-2.299-6.813-1.725-8.571 1.068-1.003 1.596-1.165 3.59-.472 5.352.701 1.777 2.434 3.098 4.354 3.345 2.531.322 4.957-1.239 5.645-3.752h-4.731v-3.453h8.535c.093.472.143.944.143 1.406.5 5.5-4.08 9.973-9.5 9.973A9.992 9.992 0 0 1 2 12.852c0-5.522 4.477-10 10-10 2.862 0 5.44 1.215 7.262 3.14l3.376-3.315z" fill="black"/>
+                    </svg>
+                </button>
+                <button class="social-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16.365 1.43c0 1.143-.241 2.084-.72 2.825-.482.74-1.173 1.115-2.095 1.115-1.02 0-1.609-.879-1.609-2.641 0-1.195.208-2.082.624-2.662C13.001 0 13.631 0 14.235 0c.607 0 1.136 0 1.602.455.467.456.528 1.293.528 2.1 0 0 0-.741 0-1.125zM3 8h4c-.012.83-.026 1.655-.026 1.926.13-.4.444-.6.89-.6 1.555 0 2.633 1.962 3.335 3.35.704 1.39 1.12 3.112 1.12 5.124 0 1.294-.496 2.259-1.484 2.908-1.975 1.3-4.642-1.252-7.984-7.624C3.444 14.536 4.741 17 6.5 17c.262 0 .522-.02.78-.06L3 23h3l4.701-7H13V8H9.893v7.132c-1.364 1.86-3.378-.132-3.957-1.476.719-1.962 1.292-4.354 1.539-7.532L3 8z" fill="#000000"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="signup-link">
+                Don't have an account? <a href="signup-page.html">Sign up</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="#">Laptops</a></li>
+                    <li><a href="#">Smartphones</a></li>
+                    <li><a href="#">Gaming</a></li>
+                    <li><a href="#">Accessories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="contact-page.html">Contact Us</a></li>
+                    <li><a href="returns-policy.html">Returns</a></li>
+                    <li><a href="warrantypage.html">Warranty</a></li>
+                    <li><a href="faqs.html">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="terms-of-service.html">Terms of Service</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+  <script>
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (email && password) {
+      try {
+        const response = await fetch('http://localhost:3000/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Login successful, redirect or store token if needed
+          console.log('Login successful:', result);
+          window.sessionStorage.setItem('token',  result.session.access_token); // Store token if needed
+          window.sessionStorage.setItem('email', JSON.stringify(result.user.email)); // Store user info if needed
+
+          window.location.href = '../pages/admin/product-admin-panel.html';
+          window.location.href = '../pages/Home.html';
+        } else {
+          // Show server error message
+          document.getElementById('error-message').innerText = result.error;
+          document.getElementById('error-message').style.display = 'block';
+        }
+      } catch (err) {
+        document.getElementById('error-message').innerText = 'Network error. Please try again.';
+        document.getElementById('error-message').style.display = 'block';
+      }
+    } else {
+      // Show error message
+      document.getElementById('error-message').innerText = 'Please enter email and password.';
+      document.getElementById('error-message').style.display = 'block';
+    }
+  });
+</script>
+
+</body>
+</html>

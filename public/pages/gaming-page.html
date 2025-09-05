@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bazara - Gaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-bg: #f4f4f4;
+            --secondary-bg: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #666666;
+            --accent: #000000;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 90px;
+        }
+
+        .hero {
+            background-color: var(--secondary-bg);
+            text-align: center;
+            padding: 4rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            background-color: var(--secondary-bg);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        /* Products */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-specs {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            background-color: #333;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--secondary-bg);
+            padding: 3rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 0;
+            }
+
+            .nav-menu {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-menu a {
+                margin: 0 10px 10px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+
+            .products {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="bazara-about-page.html">
+                <img src="logo4.png" alt="Bazara Logo" class="logo" width="65" height="auto">
+            </a>
+            <nav class="nav-menu">
+                <a href="shop-page (1).html">Home</a>
+                <a href="laptop-page.html">Laptops</a>
+                <a href="shop-page (1).html">Smartphones</a>
+                <a href="#">Gaming</a>
+                <a href="#" class="cart-icon">
+                    Cart
+                    <span class="cart-count">0</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="hero">
+            <h1>Gaming Gear</h1>
+            <p>Elevate your gaming experience with cutting-edge consoles, powerful gaming PCs, and immersive accessories.</p>
+        </section>
+
+        <section class="filter-section">
+            <select class="filter-select" aria-label="Category Filter">
+                <option>All Categories</option>
+                <option>Consoles</option>
+                <option>Gaming PCs</option>
+                <option>Accessories</option>
+                <option>Monitors</option>
+            </select>
+            <select class="filter-select" aria-label="Price Range">
+                <option>All Prices</option>
+                <option>Under R5,000</option>
+                <option>R5,000 - R15,000</option>
+                <option>R15,000 - R30,000</option>
+                <option>Over R30,000</option>
+            </select>
+            <select class="filter-select" aria-label="Brand">
+                <option>All Brands</option>
+                <option>PlayStation</option>
+                <option>Xbox</option>
+                <option>ASUS ROG</option>
+                <option>Razer</option>
+            </select>
+        </section>
+
+        <section>
+            <div class="products">
+                <div class="product-card">
+                    <img src="PS5.png" alt="PS5 Digital Edition" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">PS5 Digital Edition</h3>
+                        <p class="product-specs">825GB SSD • 4K • 120fps</p>
+                        <p class="product-price">R14,099</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="Xboxseries.png" alt="Xbox Series X" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Xbox Series X</h3>
+                        <p class="product-specs">1TB SSD • 4K • Game Pass</p>
+                        <p class="product-price">R15,299</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="AsusGamingDesktop.png" alt="ASUS ROG Gaming PC" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">ASUS ROG Desktop</h3>
+                        <p class="product-specs">RTX 4080 • Ryzen 9 • 32GB </p>
+                        <p class="product-price">R34,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="RazerBlackwidowV4.png" alt="Razer Blackwidow V4" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Razer Blackwidow V4</h3>
+                        <p class="product-specs">Mechanical Keyboard • RGB • Optical Switches</p>
+                        <p class="product-price">R4,299</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="AlienwareMonitor.png" alt="Alienware Gaming Monitor" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Alienware 34" QHD Monitor</h3>
+                        <p class="product-specs">240Hz • 1ms • Curved • G-Sync</p>
+                        <p class="product-price">R19,999</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="LogitechMouse.png" alt="LogitechMouse.png" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Logitech G Pro Wireless</h3>
+                        <p class="product-specs">25K DPI • Lightweight • RGB</p>
+                        <p class="product-price">R2,799</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="Dell43inch2.png" alt="LogitechMouse.png" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Dell UltraSharp 43 4K USB-C</h3>
+                        <p class="product-specs">25K DPI • Lightweight • RGB</p>
+                        <p class="product-price">R6,799</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="Dell43inch.png" alt="LogitechMouse.png" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-title">DELL U4320Q ULTRASHARP 43</h3>
+                            <p class="product-specs">25K DPI • Lightweight • RGB</p>
+                            <p class="product-price">R5,799</p>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="#">Laptops</a></li>
+                    <li><a href="#">Smartphones</a></li>
+                    <li><a href="#">Gaming</a></li>
+                    <li><a href="#">Accessories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="contact-page.html">Contact Us</a></li>
+                    <li><a href="returns-policy.html">Returns</a></li>
+                    <li><a href="warrantypage.html">Warranty</a></li>
+                    <li><a href="faqs.html">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="terms-of-service.html">Terms of Service</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

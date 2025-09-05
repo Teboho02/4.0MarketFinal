@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Bazara Tech Market</title>
+    <script src="./admin.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary-bg: #f4f4f4;
+            --secondary-bg: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #666666;
+            --accent: #000000;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 90px;
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Admin Panel */
+        .admin-section {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .admin-section-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .admin-section-header h2 {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        /* Product Form */
+        .product-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .submit-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #333;
+        }
+
+        /* Product List */
+        .product-list {
+            margin-top: 2rem;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th,
+        .product-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .product-table th {
+            background-color: var(--primary-bg);
+            font-weight: 600;
+        }
+
+        .product-table tr:hover {
+            background-color: var(--primary-bg);
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 0.85rem;
+        }
+
+        .action-btn.edit {
+            background-color: #3498db;
+        }
+
+        .action-btn.delete {
+            background-color: var(--error-color);
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .success-message {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .product-form {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .admin-tabs {
+                flex-direction: column;
+            }
+
+            .product-table thead {
+                display: none;
+            }
+
+            .product-table, .product-table tbody, .product-table tr, .product-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .product-table tr {
+                margin-bottom: 15px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+            }
+
+            .product-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .product-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 12px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="./Home.html">
+                <img src="../../public/images/logo4.png" alt="Bazara Logo" class="logo" width="65" height="auto">
+            </a>
+            <nav class="nav-menu">
+                <a href="./Home.html">Home</a>
+                <a href="./admin-panel.html" class="active">Admin</a>
+                <a href="#" id="admin-email"></a>
+                <a href="./login-page.html" id="logout-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage your products, categories, and inventory</p>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="tab-button active" data-tab="add-product">Add Product</button>
+            <button class="tab-button" data-tab="manage-products">Manage Products</button>
+        </div>
+
+        <div id="status-message" class="status-message"></div>
+
+        <section class="admin-section tab-content active" id="add-product">
+            <div class="admin-section-header">
+                <h2>Add New Product</h2>
+            </div>
+            <form id="product-form" class="product-form">
+                <div class="form-group">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category">Category</label>
+                    <select id="product-category" name="category" required>
+                        <option value="">Select a category</option>
+                        <option value="laptops">Laptops</option>
+                        <option value="smartphones">Smartphones</option>
+                        <option value="gaming">Gaming</option>
+                        <option value="accessories">Accessories</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-price">Price (R)</label>
+                    <input type="number" id="product-price" name="price" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-stock">Stock Quantity</label>
+                    <input type="number" id="product-stock" name="stock" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-specs">Specifications</label>
+                    <input type="text" id="product-specs" name="specs" placeholder="e.g. 8GB RAM • 256GB SSD • 15.6 inch" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-brand">Brand</label>
+                    <input type="text" id="product-brand" name="brand" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="product-description">Description</label>
+                    <textarea id="product-description" name="description" required></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="product-image-file">Product Image</label>
+                    <input type="file" id="product-image-file" name="image_file" accept="image/*">
+                    <p class="form-help">Upload an image file for the product</p>
+                    <div class="image-preview" id="image-preview">
+                        <span>Image preview will appear here</span>
+                    </div>
+                    <input type="hidden" id="product-image" name="image_url">
+                </div>
+
+                <div class="form-group full-width">
+                    <button type="submit" class="submit-btn">Add Product</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="admin-section tab-content" id="manage-products">
+            <div class="admin-section-header">
+                <h2>Manage Products</h2>
+            </div>
+
+            <div class="product-list">
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                        <!-- Products will be loaded here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

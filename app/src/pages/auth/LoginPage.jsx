@@ -187,11 +187,7 @@ const LoginPage = () => {
           </div>
 
           {/* Demo Account */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-800 text-center">
-              <strong>Demo Account:</strong> admin@bazara.com / admin123
-            </p>
-          </div>
+      
         </div>
       </div>
     </div>

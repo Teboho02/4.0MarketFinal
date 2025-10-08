@@ -50,46 +50,161 @@ const Home = () => {
     try {
       setLoading(true)
       const allProducts = await productService.getAllProducts()
-      
-      // Group products by category
-      const groupedProducts = allProducts.reduce((acc, product) => {
-        const category = product.category.toLowerCase()
-        if (!acc[category]) {
-          acc[category] = []
-        }
-        acc[category].push(product)
-        return acc
-      }, {})
 
-      setProducts(groupedProducts)
+      console.log('Raw products data:', allProducts)
+      
+      // Enhanced product processing with image validation
+      const processedProducts = allProducts.map(product => {
+        // Fix price data to prevent "RNan" display
+        const retailPrice = parseFloat(product.retail_price) || 0;
+        const costPrice = parseFloat(product.cost_price) || 0;
+        
+        // Calculate profit if not provided
+        let profit = product.profit;
+        if (!profit || typeof profit.amount === 'undefined') {
+          const profitAmount = retailPrice - costPrice;
+          const profitPercentage = costPrice > 0 ? (profitAmount / costPrice) * 100 : 0;
+          profit = {
+            amount: Math.max(0, profitAmount),
+            percentage: `${profitPercentage.toFixed(1)}%`
+          };
+        }
+
+        // Enhanced image handling
+        let images = [];
+        if (Array.isArray(product.images)) {
+          images = product.images.map(img => {
+            if (typeof img === 'string') {
+              // Clean up image URLs - remove any extra characters or fix encoding
+              let cleanUrl = img.trim();
+              // Fix common URL issues
+              cleanUrl = cleanUrl.replace(/\s+/g, '');
+              // Ensure URL is properly encoded
+              try {
+                const url = new URL(cleanUrl);
+                return url.toString();
+              } catch (e) {
+                console.warn('Invalid image URL:', cleanUrl);
+                return null;
+              }
+            }
+            return null;
+          }).filter(img => img !== null); // Remove null values
+        }
+
+        // If no valid images, use a placeholder
+        if (images.length === 0) {
+          images = ['/api/placeholder/300/300'];
+        }
+
+        // Fix brand-category inconsistencies
+        let categoryName = product.category_name;
+        if (categoryName === 'iphones' && product.brand === 'SAMSUNG') {
+          categoryName = 'samsung-phones';
+        }
+
+        return {
+          ...product,
+          retail_price: retailPrice.toFixed(2),
+          cost_price: costPrice.toFixed(2),
+          profit,
+          images,
+          category_name: categoryName,
+          name: product.name || 'Unnamed Product',
+          description: product.description || 'No description available',
+          brand: product.brand || 'Unknown Brand'
+        };
+      });
+
+      console.log('Processed products with images:', processedProducts);
+      
+      // Category grouping
+      const groupedProducts = processedProducts.reduce((acc, product) => {
+        let category = 'uncategorized';
+        
+        if (product.category_name && typeof product.category_name === 'string') {
+          category = product.category_name.toLowerCase().trim();
+        }
+        
+        category = category.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        
+        if (!category) {
+          category = 'uncategorized';
+        }
+        
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(product);
+        return acc;
+      }, {});
+
+      console.log('Final grouped products:', groupedProducts);
+      setProducts(groupedProducts);
     } catch (err) {
-      setError(err.message || 'Failed to load products')
+      setError(err.message || 'Failed to load products');
+      console.error('Error fetching products:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   }
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }
 
   const categoryDisplayNames = {
-    laptops: 'Laptops',
+    iphones: 'iPhones',
     smartphones: 'Smartphones',
+    laptops: 'Laptops',
     gaming: 'Gaming',
-    accessories: 'Accessories'
+    accessories: 'Accessories',
+    'samsung-phones': 'Samsung Phones',
+    uncategorized: 'Other Products'
   }
+
+  const getCategoryDisplayName = (category) => {
+    return categoryDisplayNames[category] || 
+           category.split('_').map(word => 
+             word.charAt(0).toUpperCase() + word.slice(1)
+           ).join(' ');
+  }
+
+  // Test image URLs directly in the component
+  const testImageUrls = [
+    'https://bucket-uf4nv2.s3.ap-southeast-1.amazonaws.com/products/cf6229d7-fff5-42a5-af13-81b76c09e694/09b53dba-f4c3-41fb-8835-a400fefc71e9.jpeg',
+    'https://bucket-uf4nv2.s3.ap-southeast-1.amazonaws.com/products/cf6229d7-fff5-42a5-af13-81b76c09e694/21915175-c5bd-434a-9593-4a48c88bc4b2.jpg'
+  ];
 
   if (loading) {
     return (
       <div className="pt-16 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="spinner mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="pt-16 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
+            <p className="text-red-700 mb-4">{error}</p>
+            <button
+              onClick={fetchProducts}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -163,37 +278,63 @@ const Home = () => {
           </p>
         </div>
 
-        {error && (
-          <div className="alert alert-error text-center mb-8">
-            Failed to load products: {error}
+        {/* Image Debug Section */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 className="font-semibold mb-2 text-yellow-800">Image Debug:</h3>
+            <p className="text-yellow-700 mb-2">Test Image URLs:</p>
+            <div className="flex space-x-4 mb-4">
+              {testImageUrls.map((url, index) => (
+                <div key={index} className="text-center">
+                  <img 
+                    src={url} 
+                    alt={`Test ${index}`}
+                    className="w-20 h-20 object-cover rounded border"
+                    onError={(e) => {
+                      console.error(`Failed to load test image ${index}:`, url);
+                      e.target.style.display = 'none';
+                    }}
+                    onLoad={(e) => {
+                      console.log(`Successfully loaded test image ${index}:`, url);
+                    }}
+                  />
+                  <p className="text-xs mt-1 text-yellow-600">Test {index + 1}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-yellow-700">Categories found: {Object.keys(products).join(', ') || 'None'}</p>
+            <p className="text-yellow-700">Total products: {Object.values(products).flat().length}</p>
           </div>
         )}
 
         {/* Product Categories */}
         {Object.entries(products).map(([category, categoryProducts]) => {
-          if (categoryProducts.length === 0) return null
+          if (categoryProducts.length === 0) return null;
           
           return (
             <section key={category} className="mb-16">
               <div className="flex justify-between items-center mb-8 pb-4 border-b-2 border-gray-100">
                 <h2 className="text-3xl font-bold text-gray-900">
-                  {categoryDisplayNames[category] || category}
+                  {getCategoryDisplayName(category)}
                 </h2>
                 <Link
                   to={`/category/${category}`}
                   className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
                 >
-                  View All {categoryDisplayNames[category]}
+                  View All {getCategoryDisplayName(category)}
                 </Link>
               </div>
               
-              <div className="grid grid-auto gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {categoryProducts.slice(0, 4).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard 
+                    key={product.id} 
+                    product={product}
+                  />
                 ))}
               </div>
             </section>
-          )
+          );
         })}
 
         {Object.keys(products).length === 0 && !loading && (
@@ -208,7 +349,7 @@ const Home = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

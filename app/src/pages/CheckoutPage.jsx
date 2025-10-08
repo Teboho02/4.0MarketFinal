@@ -10,6 +10,7 @@ const CheckoutPage = () => {
   const { user, isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState('shipping')
+  const [error, setError] = useState('')
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -18,15 +19,41 @@ const CheckoutPage = () => {
     city: '',
     postalCode: '',
     country: 'South Africa',
-    phone: '',
-    paymentMethod: 'card',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: ''
+    phone: ''
   })
 
   const summary = getCartSummary()
+
+  // Calculate order totals directly to ensure consistency
+  const calculateOrderTotals = () => {
+    const subtotal = cart.reduce((total, item) => {
+      const price = parseFloat(item.retail_price) || 0
+      return total + (price * item.quantity)
+    }, 0)
+    
+    const shipping = 50.00 // Fixed R50 shipping
+    const total = subtotal + shipping
+    
+    return {
+      subtotal,
+      shipping,
+      total,
+      itemCount: cart.reduce((count, item) => count + item.quantity, 0)
+    }
+  }
+
+  const orderTotals = calculateOrderTotals()
+
+  const formatPrice = (price) => {
+    const numericPrice = parseFloat(price)
+    if (isNaN(numericPrice)) {
+      return 'R0.00'
+    }
+    return `R${numericPrice.toLocaleString('en-ZA', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`
+  }
 
   // Redirect if cart is empty
   if (cart.length === 0) {
@@ -40,13 +67,6 @@ const CheckoutPage = () => {
     return null
   }
 
-  const formatPrice = (price) => {
-    return `R${parseFloat(price).toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`
-  }
-
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -55,85 +75,87 @@ const CheckoutPage = () => {
     }))
   }
 
-  const handleCardNumberChange = (e) => {
-    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    let formatted = ''
-    
-    for (let i = 0; i < value.length; i++) {
-      if (i > 0 && i % 4 === 0) {
-        formatted += ' '
-      }
-      formatted += value[i]
-    }
-    
-    setFormData(prev => ({
-      ...prev,
-      cardNumber: formatted
-    }))
-  }
-
-  const handleExpiryChange = (e) => {
-    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    
-    if (value.length > 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4)
-    }
-    
-    setFormData(prev => ({
-      ...prev,
-      expiryDate: value
-    }))
-  }
-
   const validateShippingForm = () => {
     const required = ['email', 'fullName', 'address', 'city', 'postalCode', 'phone']
     return required.every(field => formData[field].trim())
   }
 
-  const validatePaymentForm = () => {
-    if (formData.paymentMethod === 'card') {
-      const required = ['cardNumber', 'expiryDate', 'cvv', 'cardName']
-      return required.every(field => formData[field].trim())
-    }
-    return true
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!validateShippingForm() || !validatePaymentForm()) {
-      alert('Please fill in all required fields')
+    if (!validateShippingForm()) {
+      setError('Please fill in all required fields')
       return
     }
 
     setLoading(true)
+    setError('')
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Convert total to cents (Yoco requires amount in cents)
+      const amountInCents = Math.round(orderTotals.total * 100)
       
-      // Create order object
+      // Get current domain for redirect URLs
+      const baseUrl = window.location.origin
+      
+      // Create order ID
+      const orderId = `ORD-${Date.now()}`
+      
+      // Prepare order data to store temporarily
       const orderData = {
-        id: `ORD-${Date.now()}`,
+        id: orderId,
         items: cart,
-        summary,
+        summary: orderTotals,
         shipping: formData,
-        paymentMethod: formData.paymentMethod,
         orderDate: new Date().toISOString(),
-        status: 'confirmed'
+        status: 'pending'
+      }
+      
+      // Store order data temporarily (will be retrieved on success)
+      sessionStorage.setItem('pendingOrder', JSON.stringify(orderData))
+      
+      // Create Yoco checkout
+      const response = await fetch('/api/payments/yoco/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify({
+          amount: amountInCents,
+          currency: 'ZAR',
+          cancelUrl: `${baseUrl}/checkout?cancelled=true`,
+          successUrl: `${baseUrl}/payment-success`,
+          failureUrl: `${baseUrl}/payment-failed`,
+          metadata: {
+            orderId: orderId,
+            userId: user?.id || 'guest',
+            userEmail: formData.email,
+            itemCount: cart.length,
+            customerName: formData.fullName
+          }
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create payment')
       }
 
-      // Store order for confirmation page
-      localStorage.setItem('completedOrder', JSON.stringify(orderData))
-      
-      // Clear cart
-      clearCart()
-      
-      // Navigate to confirmation
-      navigate('/order-confirmation')
+      if (data.success && data.redirectUrl) {
+        // Store checkout ID for verification
+        sessionStorage.setItem('yocoCheckoutId', data.checkoutId)
+        
+        // Redirect to Yoco payment page
+        window.location.href = data.redirectUrl
+      } else {
+        throw new Error('Invalid response from payment gateway')
+      }
+
     } catch (error) {
-      alert('Payment failed. Please try again.')
-    } finally {
+      console.error('Payment error:', error)
+      setError(error.message || 'Failed to initiate payment. Please try again.')
       setLoading(false)
     }
   }
@@ -188,6 +210,13 @@ const CheckoutPage = () => {
           {/* Main Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 text-sm">{error}</p>
+                </div>
+              )}
+
               {/* Shipping Information */}
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
@@ -285,85 +314,26 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              {/* Payment Method */}
+              {/* Payment Information */}
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Payment Method
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <Lock className="w-5 h-5 mr-2" />
+                  Secure Payment
                 </h2>
-                
-                <div className="space-y-4 mb-6">
-                  <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="card"
-                      checked={formData.paymentMethod === 'card'}
-                      onChange={handleInputChange}
-                      className="mr-3"
-                    />
-                    <CreditCard className="w-6 h-6 mr-3 text-gray-600" />
-                    <span className="font-medium">Credit/Debit Card</span>
-                  </label>
-                </div>
-
-                {formData.paymentMethod === 'card' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="form-label">Card Number</label>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleCardNumberChange}
-                        className="form-input"
-                        placeholder="1234 5678 9012 3456"
-                        maxLength={19}
-                        required
-                      />
-                    </div>
-                    
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <Lock className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                     <div>
-                      <label className="form-label">Expiry Date</label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
-                        onChange={handleExpiryChange}
-                        className="form-input"
-                        placeholder="MM/YY"
-                        maxLength={5}
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="form-label">CVV</label>
-                      <input
-                        type="text"
-                        name="cvv"
-                        value={formData.cvv}
-                        onChange={handleInputChange}
-                        className="form-input"
-                        placeholder="123"
-                        maxLength={4}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="form-label">Name on Card</label>
-                      <input
-                        type="text"
-                        name="cardName"
-                        value={formData.cardName}
-                        onChange={handleInputChange}
-                        className="form-input"
-                        required
-                      />
+                      <p className="text-sm text-blue-900 font-medium mb-1">
+                        Secure Payment with Yoco
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        You'll be redirected to Yoco's secure payment page to complete your purchase. 
+                        All card details are encrypted and securely processed.
+                      </p>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -380,10 +350,14 @@ const CheckoutPage = () => {
                 ) : (
                   <>
                     <Lock className="w-5 h-5 mr-2" />
-                    Complete Order - {formatPrice(summary.total)}
+                    Proceed to Payment - {formatPrice(orderTotals.total)}
                   </>
                 )}
               </button>
+
+              <p className="text-xs text-gray-500 text-center mt-4">
+                By completing this purchase, you agree to our terms and conditions
+              </p>
             </form>
           </div>
 
@@ -399,16 +373,19 @@ const CheckoutPage = () => {
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <img
-                      src={item.image_url || item.image}
+                      src={item.images?.[0] || item.image_url || item.image}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = `https://via.placeholder.com/48x48/6c757d/ffffff?text=${encodeURIComponent(item.name.charAt(0))}`
+                      }}
                     />
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                     </div>
                     <span className="font-medium">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice((parseFloat(item.retail_price) || 0) * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -417,29 +394,26 @@ const CheckoutPage = () => {
               {/* Summary */}
               <div className="space-y-3 border-t border-gray-200 pt-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>{formatPrice(summary.subtotal)}</span>
+                  <span className="text-gray-600">Subtotal ({orderTotals.itemCount} items)</span>
+                  <span>{formatPrice(orderTotals.subtotal)}</span>
                 </div>
                 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span>
-                    {summary.shipping === 0 ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      formatPrice(summary.shipping)
-                    )}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax (15%)</span>
-                  <span>{formatPrice(summary.tax)}</span>
+                  <span>{formatPrice(orderTotals.shipping)}</span>
                 </div>
                 
                 <div className="flex justify-between text-xl font-bold border-t border-gray-200 pt-3">
                   <span>Total</span>
-                  <span>{formatPrice(summary.total)}</span>
+                  <span>{formatPrice(orderTotals.total)}</span>
+                </div>
+              </div>
+
+              {/* Payment Security Badges */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                  <Lock className="w-4 h-4" />
+                  <span>Secured by Yoco Payments</span>
                 </div>
               </div>
             </div>

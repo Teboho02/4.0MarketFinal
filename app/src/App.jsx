@@ -10,7 +10,8 @@ import SignupPage from './pages/auth/SignupPage'
 import AdminPanel from './pages/admin/AdminPanel'
 import OrderConfirmation from './pages/OrderConfirmation'
 import ProtectedRoute from './components/ProtectedRoute'
-
+import ProductDetail from './pages/ProductDetail'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -24,13 +25,15 @@ function App() {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route 
-            path="/admin/*" 
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route
+            path="/admin/*"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminPanel />
               </ProtectedRoute>
-            } 
+            }
           />
         </Routes>
       </main>

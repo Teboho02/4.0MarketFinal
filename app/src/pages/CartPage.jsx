@@ -14,11 +14,35 @@ const CartPage = () => {
   const summary = getCartSummary()
 
   const formatPrice = (price) => {
-    return `R${parseFloat(price).toLocaleString('en-ZA', {
+    const numericPrice = parseFloat(price)
+    if (isNaN(numericPrice)) {
+      return 'R0.00'
+    }
+    return `R${numericPrice.toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`
   }
+
+  // Calculate cart totals directly for the order summary
+  const calculateOrderSummary = () => {
+    const subtotal = cart.reduce((total, item) => {
+      const price = parseFloat(item.retail_price) || 0
+      return total + (price * item.quantity)
+    }, 0)
+    
+    const shipping = 50.00 // Fixed R50 shipping
+    const total = subtotal + shipping
+    
+    return {
+      subtotal,
+      shipping,
+      total,
+      itemCount: cart.reduce((count, item) => count + item.quantity, 0)
+    }
+  }
+
+  const orderSummary = calculateOrderSummary()
 
   const handleQuantityChange = (productId, currentQuantity, change) => {
     const newQuantity = currentQuantity + change
@@ -69,7 +93,7 @@ const CartPage = () => {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h1 className="text-2xl font-bold text-gray-900">
-                    Shopping Cart ({summary.itemCount} items)
+                    Shopping Cart ({orderSummary.itemCount} items)
                   </h1>
                   <button
                     onClick={handleClearCart}
@@ -86,7 +110,7 @@ const CartPage = () => {
                     {/* Product Image */}
                     <div className="flex-shrink-0">
                       <img
-                        src={item.image_url || item.image}
+                        src={item.images?.[0] || item.image_url || item.image}
                         alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg"
                         onError={(e) => {
@@ -107,19 +131,19 @@ const CartPage = () => {
                               {item.brand}
                             </p>
                           )}
-                          {item.specs && (
+                          {item.specifications && (
                             <p className="text-sm text-gray-600 mt-1">
-                              {item.specs}
+                              {item.specifications}
                             </p>
                           )}
                         </div>
 
                         <div className="text-right">
                           <div className="text-lg font-bold text-gray-900 mb-2">
-                            {formatPrice(item.price * item.quantity)}
+                            {formatPrice((parseFloat(item.retail_price) || 0) * item.quantity)}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {formatPrice(item.price)} each
+                            {formatPrice(item.retail_price)} each
                           </div>
                         </div>
                       </div>
@@ -170,37 +194,20 @@ const CartPage = () => {
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({summary.itemCount} items)</span>
-                  <span>{formatPrice(summary.subtotal)}</span>
+                  <span>Subtotal ({orderSummary.itemCount} items)</span>
+                  <span>{formatPrice(orderSummary.subtotal)}</span>
                 </div>
                 
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>
-                    {summary.shipping === 0 ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      formatPrice(summary.shipping)
-                    )}
-                  </span>
+                  <span>{formatPrice(orderSummary.shipping)}</span>
                 </div>
-                
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax (15%)</span>
-                  <span>{formatPrice(summary.tax)}</span>
-                </div>
-                
-                {summary.shipping === 0 && summary.subtotal < 5000 && (
-                  <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg">
-                    Add {formatPrice(5000 - summary.subtotal)} more for free shipping
-                  </div>
-                )}
               </div>
 
               <div className="border-t border-gray-200 pt-4 mb-6">
                 <div className="flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
-                  <span>{formatPrice(summary.total)}</span>
+                  <span>{formatPrice(orderSummary.total)}</span>
                 </div>
               </div>
 

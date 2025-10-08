@@ -1,33 +1,38 @@
+// middleware/uploadMiddleware.js
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Configure multer for memory storage (files will be uploaded to Lightsail)
+const storage = multer.memoryStorage();
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-    cb(null, uploadsDir);
+// File filter - only allow images
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+  }
+};
+
+// Multer configuration
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max file size
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = uuidv4();
-    const extension = path.extname(file.originalname);
-    cb(null, uniqueSuffix + extension);
-  }
+  fileFilter: fileFilter,
 });
 
-export const upload = multer({ 
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    file.mimetype.startsWith('image/') 
-      ? cb(null, true) 
-      : cb(new Error('Only image files are allowed'));
-  }
-});
+// Export different upload configurations
+export const uploadSingle = upload.single('image');
+export const uploadMultiple = upload.array('images', 10); // Max 10 images
+export const uploadFields = upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'thumbnail', maxCount: 1 }
+]);
+
+export default upload;

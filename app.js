@@ -6,10 +6,13 @@ import { fileURLToPath } from 'url';
 
 // Routes
 import testRoutes from './routes/testRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import advertsRoutes from './routes/advertsRoutes.js';
+import yocoRoutes from './routes/yocoRoutes.js';
+import categoriesRoutes from './routes/categoriesRoutes.js';
+import suppliersRoutes from './routes/suppliersRoutes.js';
+
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -36,10 +39,12 @@ app.use(express.static(frontendPath));
 
 // API Routes (with /api prefix to avoid conflicts)
 app.use('/api', testRoutes);
-app.use('/api', uploadRoutes);
 app.use('/api', authRoutes);
 app.use('/api', productRoutes);
 app.use('/api', advertsRoutes);
+app.use('/api', yocoRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/suppliers', suppliersRoutes);
 
 // Keep your existing root route for API testing
 app.get('/api', (req, res) => {
@@ -62,3 +67,5 @@ app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`Serving frontend from: ${frontendPath}`);
 });
+
+export default app;

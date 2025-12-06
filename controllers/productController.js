@@ -101,14 +101,30 @@ export const getProductsByCategory = async (req, res) => {
 
     const products = await query(sql, [category]);
 
-    const formattedProducts = products.map(product => ({
-      ...product,
-      tags: product.tags ? product.tags.split(',') : [],
-      images: product.images ? product.images.split(',') : [],
-      profit: calculateProfitMargin(product.wholesale_price, product.retail_price),
-      specifications: product.specifications ? JSON.parse(product.specifications) : {},
-      dimensions: product.dimensions ? JSON.parse(product.dimensions) : {}
-    }));
+    console.log('Fetched products by category:', products);
+    
+    const formattedProducts = products.map(product => {
+      // Helper function to safely parse JSON
+      const safeJSONParse = (value, fallback = {}) => {
+        if (!value) return fallback;
+        if (typeof value === 'object') return value;
+        try {
+          return JSON.parse(value);
+        } catch (e) {
+          console.warn(`Failed to parse JSON for product ${product.id}:`, value);
+          return fallback;
+        }
+      };
+
+      return {
+        ...product,
+        tags: product.tags ? product.tags.split(',') : [],
+        images: product.images ? product.images.split(',') : [],
+        profit: calculateProfitMargin(product.wholesale_price, product.retail_price),
+        specifications: safeJSONParse(product.specifications, {}),
+        dimensions: safeJSONParse(product.dimensions, {})
+      };
+    });
 
     res.status(200).json(formattedProducts);
   } catch (err) {
@@ -233,7 +249,7 @@ export const createProduct = async (req, res) => {
     }
 
     // Validation
-    if (!name || !category_id || !retail_price || !wholesale_price || !sku || !supplier_id) {
+    if (!name || !category_id || !retail_price || !wholesale_price || !sku ) {
       return res.status(400).json({ 
         error: 'Missing required fields: name, category_id, retail_price, wholesale_price, sku, supplier_id' 
       });
@@ -256,16 +272,16 @@ export const createProduct = async (req, res) => {
     }
 
     // 2. Validate supplier_id exists
-    const [supplierCheck] = await query(
-      'SELECT id FROM suppliers WHERE id = ? AND is_active = TRUE',
-      [supplier_id]
-    );
+    // const [supplierCheck] = await query(
+    //   'SELECT id FROM suppliers WHERE id = ? AND is_active = TRUE',
+    //   [supplier_id]
+    // );
     
-    if (!supplierCheck) {
-      return res.status(400).json({ 
-        error: `Invalid supplier_id: ${supplier_id}. Supplier does not exist or is inactive.` 
-      });
-    }
+    // if (!supplierCheck) {
+    //   return res.status(400).json({ 
+    //     error: `Invalid supplier_id: ${supplier_id}. Supplier does not exist or is inactive.` 
+    //   });
+    // }
 
     // 3. Validate created_by user exists (if provided)
     let validatedUserId = null;
@@ -343,7 +359,7 @@ export const createProduct = async (req, res) => {
         max_stock_level || 100,
         sku, 
         supplier_sku || '', 
-        supplier_id, 
+         1,  
         weight_kg || null,
         JSON.stringify(dimensions || {}), 
         insurance_type || 'none', 

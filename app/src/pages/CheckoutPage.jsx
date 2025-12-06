@@ -31,7 +31,7 @@ const CheckoutPage = () => {
       return total + (price * item.quantity)
     }, 0)
     
-    const shipping = 50.00 // Fixed R50 shipping
+    const shipping = 1.00 // Fixed R50 shipping
     const total = subtotal + shipping
     
     return {

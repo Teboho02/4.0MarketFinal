@@ -28,7 +28,6 @@ const CategoryPage = () => {
       title: 'Laptops',
       description: 'Discover powerful and sleek laptops designed for work, creativity, and entertainment. From ultrabooks to gaming beasts.',
       hero: 'from-blue-600 to-blue-800',
-      icon: '💻',
       priceRanges: [
         { value: 'under-10000', label: 'Under R10,000' },
         { value: '10000-20000', label: 'R10,000 - R20,000' },
@@ -40,7 +39,6 @@ const CategoryPage = () => {
       title: 'Smartphones',
       description: 'Discover the latest mobile technology that keeps you connected, productive, and entertained on the go.',
       hero: 'from-purple-600 to-purple-800',
-      icon: '📱',
       priceRanges: [
         { value: 'under-5000', label: 'Under R5,000' },
         { value: '5000-10000', label: 'R5,000 - R10,000' },
@@ -48,11 +46,10 @@ const CategoryPage = () => {
         { value: 'over-20000', label: 'Over R20,000' }
       ]
     },
-    gaming: {
-      title: 'Gaming Gear',
+    PC: {
+      title: 'PCs and Monitors',
       description: 'Elevate your gaming experience with cutting-edge consoles, powerful gaming PCs, and immersive accessories.',
       hero: 'from-red-600 to-red-800',
-      icon: '🎮',
       priceRanges: [
         { value: 'under-5000', label: 'Under R5,000' },
         { value: '5000-15000', label: 'R5,000 - R15,000' },
@@ -64,7 +61,6 @@ const CategoryPage = () => {
       title: 'Accessories',
       description: 'Complete your tech setup with premium accessories and peripherals that enhance your digital experience.',
       hero: 'from-green-600 to-green-800',
-      icon: '🔌',
       priceRanges: [
         { value: 'under-500', label: 'Under R500' },
         { value: '500-1000', label: 'R500 - R1,000' },
@@ -78,7 +74,6 @@ const CategoryPage = () => {
     title: categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1) || 'Products',
     description: `Explore our ${categoryName} collection`,
     hero: 'from-gray-600 to-gray-800',
-    icon: '🛍️',
     priceRanges: [
       { value: 'under-5000', label: 'Under R5,000' },
       { value: '5000-15000', label: 'R5,000 - R15,000' },

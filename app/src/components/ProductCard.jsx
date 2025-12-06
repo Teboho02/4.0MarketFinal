@@ -45,9 +45,21 @@ const ProductCard = ({ product }) => {
   }
 
   // Get product specifications
-  const getSpecifications = () => {
-    return product.specifications || product.specs || ''
+ const getSpecifications = () => {
+  const specs = product.specifications || product.specs || ''
+  
+  if (specs && typeof specs === 'object') {
+    // Create a more readable format
+    const parts = []
+    if (specs.ram) parts.push(specs.ram)
+    if (specs.storage) parts.push(specs.storage)
+    if (specs.color) parts.push(specs.color)
+    if (specs.processor) parts.push(specs.processor)
+    return parts.join(' • ')
   }
+  
+  return specs
+}
 
   // Get product price - handle different possible field names
   const getProductPrice = () => {
@@ -113,24 +125,7 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
 
-          {/* Stock Status */}
-          <div className="mb-3">
-            <span className={`text-sm font-medium ${
-              stockQuantity > 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {stockQuantity > 0 
-                ? `${stockQuantity} in stock` 
-                : 'Out of stock'
-              }
-            </span>
-            
-            {/* Stock level indicators */}
-            {stockQuantity > 0 && product.min_stock_level && stockQuantity <= product.min_stock_level && (
-              <span className="text-xs text-orange-600 ml-2">
-                (Low stock)
-              </span>
-            )}
-          </div>
+        
         </div>
       </Link>
 

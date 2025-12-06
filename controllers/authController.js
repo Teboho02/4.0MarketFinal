@@ -4,7 +4,7 @@
   import { randomUUID } from 'crypto';
   import validator from 'validator'; // npm install validator
 
-  const JWT_SECRET = process.env.JWT_SECRET ;
+  const JWT_SECRET = 'djwajkh4ia3yeadawe823yeauhdLJAadwj83' ;
   const JWT_EXPIRES_IN = '7d';
 
   export const createAccount = async (req, res) => {

@@ -8,7 +8,8 @@ import {
   updateProduct,
   deleteProduct
 } from '../controllers/productController.js';
-impo
+import { verifyToken } from '../controllers/authController.js';
+
 import { uploadMultiple } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();

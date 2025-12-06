@@ -50,10 +50,10 @@ const Header = () => {
                                 Smartphones
                             </Link>
                             <Link
-                                to="/category/gaming"
+                                to="/category/PC"
                                 className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
                             >
-                                Gaming
+                                PC's and Monitors
                             </Link>
                             <Link
                                 to="/category/accessories"

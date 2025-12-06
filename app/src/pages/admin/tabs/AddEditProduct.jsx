@@ -159,8 +159,9 @@ const generateSKU = (productName, category) => {
     setSuccess('')
 
     try {
+      // Remove supplier_id from required fields validation
       if (!formData.name || !formData.category_id || !formData.supplier_sku || 
-          !formData.wholesale_price || !formData.retail_price || !formData.supplier_id) {
+          !formData.wholesale_price || !formData.retail_price) {
         throw new Error('Please fill in all required fields')
       }
 
@@ -176,7 +177,8 @@ const generateSKU = (productName, category) => {
         wholesale_price: parseFloat(formData.wholesale_price),
         retail_price: parseFloat(formData.retail_price),
         stock_quantity: parseInt(formData.stock_quantity) || 0,
-        supplier_id: parseInt(formData.supplier_id),
+        // Only parse supplier_id if it has a value, otherwise set to null
+        supplier_id: formData.supplier_id ? parseInt(formData.supplier_id) : null,
         category_id: parseInt(formData.category_id)
       }
 
@@ -334,15 +336,15 @@ const generateSKU = (productName, category) => {
             </div>
 
             <div>
-              <label className="form-label">Supplier *</label>
+              <label className="form-label">Supplier</label> {/* Removed asterisk */}
               <select
                 name="supplier_id"
                 value={formData.supplier_id}
                 onChange={handleInputChange}
                 className="form-select"
-                required
+                // Removed required attribute
               >
-                <option value="">Select supplier</option>
+                <option value="">Select supplier (optional)</option> {/* Updated placeholder */}
                 {suppliers.map(supplier => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}

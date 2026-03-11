@@ -25,7 +25,7 @@ jobs:
             echo "==> Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
-            git clean -fd
+            git clean -fd --exclude=.env --exclude=uploads/
 
             echo "==> Installing backend dependencies..."
             npm install --omit=dev

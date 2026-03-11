@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netsh interface:*)",
+      "Bash(node -e \"\nconst net = require\\('net'\\);\nconst s = net.createServer\\(\\);\ns.listen\\(4000, '127.0.0.1', \\(\\) => { console.log\\('OK on 127.0.0.1:4000'\\); s.close\\(\\); }\\);\ns.on\\('error', \\(e\\) => console.error\\('Error:', e.message\\)\\);\n\" 2>&1)",
+      "Bash(node -e \"\nconst net = require\\('net'\\);\nconst s = net.createServer\\(\\);\ns.listen\\(3000, '0.0.0.0', \\(\\) => { console.log\\('OK on 0.0.0.0:3000'\\); s.close\\(\\); }\\);\ns.on\\('error', \\(e\\) => console.error\\('Error:', e.message\\)\\);\n\" 2>&1)",
+      "Bash(curl -s http://localhost:4000/api/categories 2>&1)"
+    ]
+  }
+}

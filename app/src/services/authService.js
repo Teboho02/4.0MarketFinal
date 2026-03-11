@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = '/api'
+const API_BASE_URL = 'http://localhost:4000/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -53,9 +53,9 @@ export const authService = {
 
   async signup(userData) {
     try {
-      // Validate password length before sending
-      if (userData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters long')
+      // Validate password length before sending (backend requires 8+)
+      if (userData.password.length < 8) {
+        throw new Error('Password must be at least 8 characters long')
       }
 
       const response = await api.post('/createAccount', {

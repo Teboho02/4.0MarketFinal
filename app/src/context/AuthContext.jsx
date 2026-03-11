@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
       } else if (errorMessage.includes('Invalid email')) {
         errorMessage = 'Please enter a valid email address'
       } else if (errorMessage.includes('Password should be at least')) {
-        errorMessage = 'Password must be at least 6 characters long'
+        errorMessage = 'Password must be at least 8 characters long'
       }
       
       return { 

@@ -1,0 +1,40 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            cd /home/ubuntu/4.0MarketFinal
+
+            echo "==> Pulling latest code..."
+            git pull origin main
+
+            echo "==> Installing backend dependencies..."
+            npm install --omit=dev
+
+            echo "==> Installing & building frontend..."
+            cd app
+            npm install
+            npm run build
+            cd ..
+
+            echo "==> Restarting server..."
+            pm2 restart 4market --update-env || pm2 start app.js --name 4market
+
+            echo "==> Deploy complete!"

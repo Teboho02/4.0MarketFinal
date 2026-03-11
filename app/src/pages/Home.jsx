@@ -174,15 +174,9 @@ const Home = () => {
            ).join(' ');
   }
 
-  // Test image URLs directly in the component
-  const testImageUrls = [
-    'https://bucket-uf4nv2.s3.ap-southeast-1.amazonaws.com/products/cf6229d7-fff5-42a5-af13-81b76c09e694/09b53dba-f4c3-41fb-8835-a400fefc71e9.jpeg',
-    'https://bucket-uf4nv2.s3.ap-southeast-1.amazonaws.com/products/cf6229d7-fff5-42a5-af13-81b76c09e694/21915175-c5bd-434a-9593-4a48c88bc4b2.jpg'
-  ];
-
   if (loading) {
     return (
-      <div className="pt-16 min-h-screen flex items-center justify-center">
+      <div style={{ paddingTop: '112px' }} className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading products...</p>
@@ -193,7 +187,7 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="pt-16 min-h-screen flex items-center justify-center">
+      <div style={{ paddingTop: '112px' }} className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
             <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
@@ -211,9 +205,9 @@ const Home = () => {
   }
 
   return (
-    <div className="pt-16">
+    <div style={{ paddingTop: '112px' }}>
       {/* Hero Slider */}
-      <section className="relative h-96 overflow-hidden rounded-xl mx-4 mb-8 mt-6">
+      <section className="relative overflow-hidden mx-3 mb-6 mt-4 rounded-2xl" style={{ height: '220px' }}>
         <div 
           className="flex h-full transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -224,13 +218,13 @@ const Home = () => {
               className={`min-w-full h-full bg-gradient-to-r ${slide.bgColor} flex items-center justify-center text-white text-center px-8`}
             >
               <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <h2 className="text-2xl md:text-4xl font-bold mb-3">
                   {slide.title}
                 </h2>
-                <p className="text-lg md:text-xl mb-6 opacity-90">
+                <p className="text-sm md:text-lg mb-4 opacity-90">
                   {slide.description}
                 </p>
-                <button className="bg-white text-gray-900 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                <button className="bg-white text-gray-900 px-6 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
                   {slide.buttonText}
                 </button>
               </div>
@@ -267,82 +261,61 @@ const Home = () => {
       </section>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Explore Our Tech Collection
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover the latest and greatest in technology across multiple categories. 
-            Find your perfect device today.
-          </p>
-        </div>
-
-        {/* Image Debug Section */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold mb-2 text-yellow-800">Image Debug:</h3>
-            <p className="text-yellow-700 mb-2">Test Image URLs:</p>
-            <div className="flex space-x-4 mb-4">
-              {testImageUrls.map((url, index) => (
-                <div key={index} className="text-center">
-                  <img 
-                    src={url} 
-                    alt={`Test ${index}`}
-                    className="w-20 h-20 object-cover rounded border"
-                    onError={(e) => {
-                      console.error(`Failed to load test image ${index}:`, url);
-                      e.target.style.display = 'none';
-                    }}
-                    onLoad={(e) => {
-                      console.log(`Successfully loaded test image ${index}:`, url);
-                    }}
-                  />
-                  <p className="text-xs mt-1 text-yellow-600">Test {index + 1}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-yellow-700">Categories found: {Object.keys(products).join(', ') || 'None'}</p>
-            <p className="text-yellow-700">Total products: {Object.values(products).flat().length}</p>
-          </div>
-        )}
-
+      <div className="pb-8">
         {/* Product Categories */}
         {Object.entries(products).map(([category, categoryProducts]) => {
           if (categoryProducts.length === 0) return null;
-          
+
           return (
-            <section key={category} className="mb-16">
-              <div className="flex justify-between items-center mb-8 pb-4 border-b-2 border-gray-100">
-                <h2 className="text-3xl font-bold text-gray-900">
+            <section key={category} className="mb-6">
+              {/* Section Header */}
+              <div className="flex justify-between items-center px-4 mb-3">
+                <h2 className="text-base font-bold text-gray-900">
                   {getCategoryDisplayName(category)}
                 </h2>
                 <Link
                   to={`/category/${category}`}
-                  className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  View All {getCategoryDisplayName(category)}
+                  View All
                 </Link>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {categoryProducts.slice(0, 4).map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product}
-                  />
-                ))}
+
+              {/* Horizontal Scroll Row */}
+              <div
+                style={{
+                  overflowX: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  paddingLeft: '1rem',
+                  paddingRight: '1rem',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    width: 'max-content',
+                    paddingBottom: '0.25rem',
+                  }}
+                >
+                  {categoryProducts.slice(0, 8).map((product) => (
+                    <div key={product.id} style={{ width: '160px', flexShrink: 0 }}>
+                      <ProductCard product={product} compact />
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
           );
         })}
 
         {Object.keys(products).length === 0 && !loading && (
-          <div className="text-center py-16">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+          <div className="text-center py-16 px-4">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
               No Products Available
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm">
               We're working on stocking our inventory. Please check back soon!
             </p>
           </div>

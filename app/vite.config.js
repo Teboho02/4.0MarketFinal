@@ -8,8 +8,12 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+  },
   server: {
-    port: 3000,
+    port: 5000,
     open: true,
   },
   build: {

@@ -62,18 +62,15 @@ const generateSKU = (productName, category) => {
 }
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => {
+      const next = { ...prev, [name]: value }
 
-    if ((name === 'name' || name === 'category_id') && formData.name && formData.category_id) {
-      const sku = generateSKU(
-        name === 'name' ? value : formData.name,
-        name === 'category_id' ? value : formData.category_id
-      )
-      setFormData(prev => ({ ...prev, sku }))
-    }
+      if ((name === 'name' || name === 'category_id') && next.name && next.category_id) {
+        next.sku = generateSKU(next.name, next.category_id)
+      }
+
+      return next
+    })
   }
 
   const handleCheckboxChange = (e) => {
@@ -91,7 +88,7 @@ const generateSKU = (productName, category) => {
     
     if (files.length === 0) return
 
-    const totalFiles = imageFiles.length + files.length
+    const totalFiles = imagePreviews.length + files.length
     if (totalFiles > 10) {
       setError('Maximum 10 images allowed')
       return
@@ -127,6 +124,7 @@ const generateSKU = (productName, category) => {
     })
 
     setError('')
+    e.target.value = ''
   }
 
   const removeImage = (id) => {
@@ -169,11 +167,20 @@ const generateSKU = (productName, category) => {
         throw new Error('Retail price must be higher than wholesale price')
       }
 
-      // Get only new image files (not existing ones)
-      const newImageFiles = imageFiles.filter(file => file instanceof File)
+      // Get only new image files (not existing ones) in the current preview order
+      const newImageFiles = imagePreviews
+        .filter(preview => !preview.isExisting && preview.file instanceof File)
+        .map(preview => preview.file)
+
+      const sku = formData.sku || (
+        formData.name && formData.category_id
+          ? generateSKU(formData.name, formData.category_id)
+          : ''
+      )
 
       const productData = {
         ...formData,
+        sku,
         wholesale_price: parseFloat(formData.wholesale_price),
         retail_price: parseFloat(formData.retail_price),
         stock_quantity: parseInt(formData.stock_quantity) || 0,

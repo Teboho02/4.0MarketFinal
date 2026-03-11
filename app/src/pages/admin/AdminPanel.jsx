@@ -6,7 +6,6 @@ import { supplierService } from './services/SupplierService'
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([])
-  const [orders, setOrders] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [supplierStats, setSupplierStats] = useState(null)
   const [supplierPagination, setSupplierPagination] = useState({
@@ -30,15 +29,10 @@ const AdminPanel = () => {
     city: ''
   })
 
-  // Sample data for orders and couriers
+  // Sample data for couriers
   const sampleCouriers = [
     { id: 1, name: 'FastShip Courier', contact: '+27 11 123 4567', active: true },
     { id: 2, name: 'Express Delivery', contact: '+27 21 987 6543', active: true },
-  ]
-
-  const sampleOrders = [
-    { id: 1, customer: 'John Doe', total: 1250.00, status: 'pending', date: '2024-01-15' },
-    { id: 2, customer: 'Jane Smith', total: 850.50, status: 'completed', date: '2024-01-14' },
   ]
 
   useEffect(() => {
@@ -84,9 +78,8 @@ const AdminPanel = () => {
         console.warn('Some data failed to load:', errors)
       }
       
-      // Set sample data
+      // Set sample data for couriers
       setCouriers(sampleCouriers)
-      setOrders(sampleOrders)
     } catch (err) {
       setError(err.message || 'Failed to load data')
       console.error('Error fetching data:', err)
@@ -274,7 +267,6 @@ const AdminPanel = () => {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               products={getProductsByCategory(selectedCategory)}
-              orders={orders}
               suppliers={suppliers}
               supplierStats={supplierStats}
               supplierFilters={supplierFilters}

@@ -141,8 +141,9 @@ CREATE TABLE `orders` (
   `shipping_cost` decimal(10,2) DEFAULT '0.00',
   `discount` decimal(10,2) DEFAULT '0.00',
   `total` decimal(10,2) NOT NULL,
-  `payment_method` enum('cash','card','eft','credit') NOT NULL,
+  `payment_method` enum('cash','card','eft','credit','yoco') NOT NULL,
   `payment_status` enum('pending','paid','failed','refunded') DEFAULT 'pending',
+  `yoco_checkout_id` varchar(255) DEFAULT NULL,
   `shipping_address` text,
   `billing_address` text,
   `notes` text,
@@ -154,6 +155,7 @@ CREATE TABLE `orders` (
   KEY `idx_user` (`user_id`),
   KEY `idx_status` (`status`),
   KEY `idx_payment_status` (`payment_status`),
+  KEY `idx_yoco_checkout` (`yoco_checkout_id`),
   KEY `idx_created` (`created_at`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

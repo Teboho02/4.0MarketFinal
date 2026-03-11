@@ -19,6 +19,7 @@ const PaymentSuccessPage = () => {
       // Get checkout ID from session storage
       const checkoutId = sessionStorage.getItem('yocoCheckoutId')
       const pendingOrder = sessionStorage.getItem('pendingOrder')
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token') || ''
 
       if (!checkoutId) {
         setError('No payment information found')
@@ -31,7 +32,7 @@ const PaymentSuccessPage = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          'Authorization': `Bearer ${token}`
         }
       })
 
@@ -44,21 +45,45 @@ const PaymentSuccessPage = () => {
       // Check if payment was successful
       if (data.success && data.checkout.status === 'complete') {
         // Parse pending order data
-        const order = JSON.parse(pendingOrder)
-        
-        // Update order status
+        const order = pendingOrder ? JSON.parse(pendingOrder) : {}
+
+        // Update order payment status in database
+        if (order.orderId) {
+          try {
+            const updateResponse = await fetch(`/api/orders/${order.orderId}/payment`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                payment_status: 'paid',
+                yoco_checkout_id: checkoutId
+              })
+            })
+
+            if (updateResponse.ok) {
+              console.log('Order payment status updated in database')
+            }
+          } catch (updateError) {
+            console.warn('Failed to update order status:', updateError)
+            // Continue anyway - webhook should handle this too
+          }
+        }
+
+        // Update order status locally
         order.status = 'confirmed'
         order.paymentId = checkoutId
         order.paymentMethod = 'yoco'
-        
+
         // Store completed order
         localStorage.setItem('completedOrder', JSON.stringify(order))
-        
+
         // Clear cart and session data
         clearCart()
         sessionStorage.removeItem('yocoCheckoutId')
         sessionStorage.removeItem('pendingOrder')
-        
+
         setOrderData(order)
       } else {
         throw new Error('Payment was not completed successfully')
@@ -132,7 +157,7 @@ const PaymentSuccessPage = () => {
             <p className="text-gray-600 mb-6">
               Thank you for your order. We've received your payment and will process your order shortly.
             </p>
-            
+
             {orderData && (
               <>
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -142,15 +167,16 @@ const PaymentSuccessPage = () => {
 
                 <div className="text-left border-t border-gray-200 pt-6">
                   <h3 className="font-semibold text-gray-900 mb-4">Order Details</h3>
-                  
+
                   <div className="space-y-3 mb-6">
                     {orderData.items.map((item) => (
                       <div key={item.id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <img
-                            src={item.image_url || item.image}
+                            src={item.images?.[0] || item.image_url || item.image}
                             alt={item.name}
                             className="w-12 h-12 object-cover rounded"
+                            onError={(e) => { e.target.src = `https://via.placeholder.com/48x48/6c757d/ffffff?text=${encodeURIComponent(item.name?.charAt(0) || '?')}` }}
                           />
                           <div>
                             <p className="font-medium text-sm">{item.name}</p>
@@ -158,7 +184,7 @@ const PaymentSuccessPage = () => {
                           </div>
                         </div>
                         <span className="font-medium">
-                          {formatPrice(item.price * item.quantity)}
+                          {formatPrice((parseFloat(item.retail_price) || 0) * item.quantity)}
                         </span>
                       </div>
                     ))}
@@ -172,10 +198,6 @@ const PaymentSuccessPage = () => {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping</span>
                       <span>{formatPrice(orderData.summary.shipping)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tax</span>
-                      <span>{formatPrice(orderData.summary.tax)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
                       <span>Total</span>
@@ -201,7 +223,7 @@ const PaymentSuccessPage = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <button
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/')}
               className="btn btn-outline flex-1"
             >
               Continue Shopping

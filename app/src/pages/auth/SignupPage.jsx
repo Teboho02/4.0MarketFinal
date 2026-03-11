@@ -42,8 +42,8 @@ const SignupPage = () => {
       return false
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long')
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long')
       return false
     }
 
@@ -53,11 +53,11 @@ const SignupPage = () => {
       return false
     }
 
-    // Additional password validation
-    if (formData.password === formData.email) {
-      setError('Password cannot be the same as your email address')
-      return false
-    }
+    // // Additional password validation
+    // if (formData.password === formData.email) {
+    //   setError('Password cannot be the same as your email address')
+    //   return false
+    // }
 
     return true
   }
@@ -201,7 +201,6 @@ const SignupPage = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="email"
@@ -219,7 +218,6 @@ const SignupPage = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -243,7 +241,7 @@ const SignupPage = () => {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Password must be at least 6 characters long and different from your email
+                Password must be at least 8 characters long and different from your email
               </p>
             </div>
 

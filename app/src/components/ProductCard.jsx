@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, compact = false }) => {
   const { addToCart } = useCart()
   const [isAdded, setIsAdded] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -75,10 +75,56 @@ const ProductCard = ({ product }) => {
   const productImage = getProductImage()
   const specifications = getSpecifications()
 
+  if (compact) {
+    return (
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full">
+        <Link to={`/product/${product.id}`} className="flex-grow block">
+          <div className="bg-gray-50 flex items-center justify-center p-2" style={{ height: '120px' }}>
+            <img
+              src={productImage}
+              alt={product.name}
+              className="max-w-full max-h-full object-contain"
+              onError={handleImageError}
+            />
+          </div>
+          <div className="p-2">
+            <h3 className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1 hover:text-blue-600 transition-colors">
+              {product.name || 'Unnamed Product'}
+            </h3>
+            <span className="text-sm font-bold text-gray-900">
+              {formatPrice(productPrice)}
+            </span>
+          </div>
+        </Link>
+        <div className="px-2 pb-2">
+          <button
+            onClick={handleAddToCart}
+            disabled={isAdded || stockQuantity === 0}
+            className={`w-full py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
+              isAdded
+                ? 'bg-green-600 text-white'
+                : stockQuantity === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+          >
+            {isAdded ? (
+              <><Check className="w-3 h-3" /><span>Added!</span></>
+            ) : stockQuantity === 0 ? (
+              <span>Out of Stock</span>
+            ) : (
+              <><ShoppingCart className="w-3 h-3" /><span>Add</span></>
+            )}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
       {/* Product Image and Info - Clickable for navigation */}
-      <Link 
+      <Link
         to={`/product/${product.id}`}
         className="flex-grow block"
       >
@@ -125,7 +171,7 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
 
-        
+
         </div>
       </Link>
 

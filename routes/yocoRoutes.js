@@ -1,11 +1,14 @@
 import express from 'express';
 import axios from 'axios';
+import { updatePaymentByCheckoutId } from '../controllers/ordersController.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
 
-// Yoco API configuration
-const YOCO_SECRET_KEY = process.env.YOCO_SECRET_KEY;
+// Yoco API configuration - module-scoped so all routes can access them
 const YOCO_API_URL = 'https://payments.yoco.com/api/checkouts';
+const YOCO_SECRET_KEY = process.env.YOCO_TEST_SECRET_KEY;
 
 /**
  * Create a Yoco payment checkout
@@ -13,6 +16,8 @@ const YOCO_API_URL = 'https://payments.yoco.com/api/checkouts';
  */
 router.post('/payments/yoco/checkout', async (req, res) => {
   try {
+
+
     const { amount, currency, cancelUrl, successUrl, failureUrl, metadata } = req.body;
 
     // Validate required fields
@@ -40,6 +45,8 @@ router.post('/payments/yoco/checkout', async (req, res) => {
       failureUrl,
       metadata: metadata || {}
     };
+
+
 
     // Call Yoco API
     const response = await axios.post(YOCO_API_URL, checkoutPayload, {
@@ -98,7 +105,7 @@ router.get('/payments/yoco/status/:checkoutId', async (req, res) => {
     // Enhanced status mapping
     const statusMap = {
       'complete': 'complete',
-      'pending': 'pending', 
+      'pending': 'pending',
       'processing': 'processing',
       'failed': 'failed',
       'cancelled': 'cancelled',
@@ -118,7 +125,7 @@ router.get('/payments/yoco/status/:checkoutId', async (req, res) => {
 
   } catch (error) {
     console.error('Yoco status check error:', error.response?.data || error.message);
-    
+
     // Handle specific error cases
     if (error.response?.status === 404) {
       return res.status(404).json({
@@ -160,19 +167,40 @@ router.post('/payments/yoco/webhook', express.raw({ type: 'application/json' }),
       case 'checkout.completed':
         // Payment was successful
         console.log('Payment completed:', eventPayload);
-        // TODO: Update your database, fulfill order, etc.
+        if (eventPayload?.id) {
+          try {
+            await updatePaymentByCheckoutId(eventPayload.id, 'paid');
+            console.log('Order payment status updated to paid for checkout:', eventPayload.id);
+          } catch (dbError) {
+            console.error('Failed to update order payment status:', dbError);
+          }
+        }
         break;
 
       case 'checkout.failed':
         // Payment failed
         console.log('Payment failed:', eventPayload);
-        // TODO: Handle failed payment
+        if (eventPayload?.id) {
+          try {
+            await updatePaymentByCheckoutId(eventPayload.id, 'failed');
+            console.log('Order payment status updated to failed for checkout:', eventPayload.id);
+          } catch (dbError) {
+            console.error('Failed to update order payment status:', dbError);
+          }
+        }
         break;
 
       case 'checkout.cancelled':
         // Payment was cancelled
         console.log('Payment cancelled:', eventPayload);
-        // TODO: Handle cancelled payment
+        if (eventPayload?.id) {
+          try {
+            await updatePaymentByCheckoutId(eventPayload.id, 'failed');
+            console.log('Order payment status updated to failed (cancelled) for checkout:', eventPayload.id);
+          } catch (dbError) {
+            console.error('Failed to update order payment status:', dbError);
+          }
+        }
         break;
 
       default:

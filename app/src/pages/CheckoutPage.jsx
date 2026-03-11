@@ -11,7 +11,7 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState('shipping')
   const [error, setError] = useState('')
-  
+
   const [formData, setFormData] = useState({
     email: user?.email || '',
     fullName: '',
@@ -30,10 +30,10 @@ const CheckoutPage = () => {
       const price = parseFloat(item.retail_price) || 0
       return total + (price * item.quantity)
     }, 0)
-    
-    const shipping = 1.00 // Fixed R50 shipping
+
+    const shipping = 50.00 // Fixed R50 shipping
     const total = subtotal + shipping
-    
+
     return {
       subtotal,
       shipping,
@@ -82,7 +82,7 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateShippingForm()) {
       setError('Please fill in all required fields')
       return
@@ -94,32 +94,19 @@ const CheckoutPage = () => {
     try {
       // Convert total to cents (Yoco requires amount in cents)
       const amountInCents = Math.round(orderTotals.total * 100)
-      
+
       // Get current domain for redirect URLs
       const baseUrl = window.location.origin
-      
-      // Create order ID
-      const orderId = `ORD-${Date.now()}`
-      
-      // Prepare order data to store temporarily
-      const orderData = {
-        id: orderId,
-        items: cart,
-        summary: orderTotals,
-        shipping: formData,
-        orderDate: new Date().toISOString(),
-        status: 'pending'
-      }
-      
-      // Store order data temporarily (will be retrieved on success)
-      sessionStorage.setItem('pendingOrder', JSON.stringify(orderData))
-      
-      // Create Yoco checkout
-      const response = await fetch('/api/payments/yoco/checkout', {
+
+      // Get auth token
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token') || ''
+
+      // Step 1: Create Yoco checkout first to get the checkout ID
+      const yocoResponse = await fetch('/api/payments/yoco/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('token') || ''}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           amount: amountInCents,
@@ -128,7 +115,6 @@ const CheckoutPage = () => {
           successUrl: `${baseUrl}/payment-success`,
           failureUrl: `${baseUrl}/payment-failed`,
           metadata: {
-            orderId: orderId,
             userId: user?.id || 'guest',
             userEmail: formData.email,
             itemCount: cart.length,
@@ -137,21 +123,86 @@ const CheckoutPage = () => {
         })
       })
 
-      const data = await response.json()
+      const yocoData = await yocoResponse.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create payment')
+      if (!yocoResponse.ok) {
+        throw new Error(yocoData.message || 'Failed to create payment checkout')
       }
 
-      if (data.success && data.redirectUrl) {
-        // Store checkout ID for verification
-        sessionStorage.setItem('yocoCheckoutId', data.checkoutId)
-        
-        // Redirect to Yoco payment page
-        window.location.href = data.redirectUrl
-      } else {
+      if (!yocoData.success || !yocoData.redirectUrl || !yocoData.checkoutId) {
         throw new Error('Invalid response from payment gateway')
       }
+
+      // Step 2: Create order in database with Yoco checkout ID
+      const orderPayload = {
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          sku: item.sku || 'N/A',
+          quantity: item.quantity,
+          wholesale_price: item.wholesale_price || 0,
+          retail_price: item.retail_price
+        })),
+        subtotal: orderTotals.subtotal,
+        tax: 0,
+        shipping_cost: orderTotals.shipping,
+        discount: 0,
+        total: orderTotals.total,
+        payment_method: 'yoco',
+        shipping_address: {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country
+        },
+        billing_address: {
+          fullName: formData.fullName,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country
+        },
+        yoco_checkout_id: yocoData.checkoutId
+      }
+
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderResponse.ok) {
+        console.warn('Failed to save order to database:', orderData.message)
+        // Continue with payment even if order save fails - webhook will handle it
+      } else {
+        console.log('Order created in database:', orderData.order?.id)
+      }
+
+      // Step 3: Store data for verification and redirect
+      const pendingOrderData = {
+        id: orderData.order?.order_number || `ORD-${Date.now()}`,
+        orderId: orderData.order?.id,
+        items: cart,
+        summary: orderTotals,
+        shipping: formData,
+        orderDate: new Date().toISOString(),
+        status: 'pending'
+      }
+
+      sessionStorage.setItem('pendingOrder', JSON.stringify(pendingOrderData))
+      sessionStorage.setItem('yocoCheckoutId', yocoData.checkoutId)
+
+      // Redirect to Yoco payment page
+      window.location.href = yocoData.redirectUrl
 
     } catch (error) {
       console.error('Payment error:', error)
@@ -173,31 +224,29 @@ const CheckoutPage = () => {
         <div className="max-w-3xl mx-auto mb-8">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200">
-              <div 
+              <div
                 className="h-full bg-blue-600 transition-all duration-300"
                 style={{ width: currentStep === 'payment' ? '50%' : '0%' }}
               />
             </div>
-            
+
             {steps.map((step, index) => {
               const Icon = step.icon
               const isActive = currentStep === step.id
               const isCompleted = step.completed
-              
+
               return (
                 <div key={step.id} className="relative bg-white">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    isActive 
-                      ? 'border-blue-600 bg-blue-600 text-white' 
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${isActive
+                      ? 'border-blue-600 bg-blue-600 text-white'
                       : isCompleted
-                      ? 'border-green-600 bg-green-600 text-white'
-                      : 'border-gray-300 bg-white text-gray-400'
-                  }`}>
+                        ? 'border-green-600 bg-green-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-400'
+                    }`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`absolute top-12 left-1/2 transform -translate-x-1/2 text-sm font-medium whitespace-nowrap ${
-                    isActive ? 'text-blue-600' : 'text-gray-500'
-                  }`}>
+                  <span className={`absolute top-12 left-1/2 transform -translate-x-1/2 text-sm font-medium whitespace-nowrap ${isActive ? 'text-blue-600' : 'text-gray-500'
+                    }`}>
                     {step.title}
                   </span>
                 </div>
@@ -223,7 +272,7 @@ const CheckoutPage = () => {
                   <Truck className="w-5 h-5 mr-2" />
                   Shipping Information
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="form-label">Email Address</label>
@@ -236,7 +285,7 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="form-label">Full Name</label>
                     <input
@@ -248,7 +297,7 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <label className="form-label">Address</label>
                     <input
@@ -260,7 +309,7 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="form-label">City</label>
                     <input
@@ -272,7 +321,7 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="form-label">Postal Code</label>
                     <input
@@ -284,7 +333,7 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="form-label">Country</label>
                     <select
@@ -298,7 +347,7 @@ const CheckoutPage = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="form-label">Phone Number</label>
                     <input
@@ -328,7 +377,7 @@ const CheckoutPage = () => {
                         Secure Payment with Yoco
                       </p>
                       <p className="text-xs text-blue-700">
-                        You'll be redirected to Yoco's secure payment page to complete your purchase. 
+                        You'll be redirected to Yoco's secure payment page to complete your purchase.
                         All card details are encrypted and securely processed.
                       </p>
                     </div>
@@ -397,12 +446,12 @@ const CheckoutPage = () => {
                   <span className="text-gray-600">Subtotal ({orderTotals.itemCount} items)</span>
                   <span>{formatPrice(orderTotals.subtotal)}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span>{formatPrice(orderTotals.shipping)}</span>
                 </div>
-                
+
                 <div className="flex justify-between text-xl font-bold border-t border-gray-200 pt-3">
                   <span>Total</span>
                   <span>{formatPrice(orderTotals.total)}</span>

@@ -6,7 +6,6 @@ const Tabs = ({
   activeTab,
   onTabChange,
   products,
-  orders,
   suppliers,
   loading,
   error,
@@ -52,8 +51,7 @@ const Tabs = ({
       )}
 
       {activeTab === 'orders' && (
-        <OrderList 
-          orders={orders}
+        <OrderList
           onBackToProducts={() => onTabChange('products')}
         />
       )}

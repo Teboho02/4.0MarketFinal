@@ -1,5 +1,5 @@
 // SupplierService.js
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:4000/api';
 
 class SupplierService {
   constructor() {
@@ -7,7 +7,7 @@ class SupplierService {
   }
 
   getAuthToken() {
-    return sessionStorage.getItem('authToken');
+    return sessionStorage.getItem('token') || localStorage.getItem('token');
   }
 
   buildHeaders(requireAuth = false) {

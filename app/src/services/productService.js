@@ -1,5 +1,5 @@
 // services/productService.js
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:4000/api';
 
 const getAuthHeaders = () => {
   const token = sessionStorage.getItem('token');
@@ -63,12 +63,18 @@ export const productService = {
       const formData = new FormData();
       
       // Add product fields
-      Object.keys(productData).forEach(key => {
-        if (key === 'tags' || key === 'specifications') {
-          formData.append(key, JSON.stringify(productData[key]));
-        } else {
-          formData.append(key, productData[key]);
+      const appendField = (key, value) => {
+        if (value === undefined || value === null) return;
+        if (key === 'tags' || key === 'specifications' || key === 'dimensions') {
+          const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+          formData.append(key, serialized);
+          return;
         }
+        formData.append(key, value);
+      };
+
+      Object.keys(productData).forEach(key => {
+        appendField(key, productData[key]);
       });
       
       // Add image files
@@ -96,12 +102,18 @@ export const productService = {
     try {
       const formData = new FormData();
       
-      Object.keys(productData).forEach(key => {
-        if (key === 'tags' || key === 'specifications') {
-          formData.append(key, JSON.stringify(productData[key]));
-        } else {
-          formData.append(key, productData[key]);
+      const appendField = (key, value) => {
+        if (value === undefined || value === null) return;
+        if (key === 'tags' || key === 'specifications' || key === 'dimensions') {
+          const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+          formData.append(key, serialized);
+          return;
         }
+        formData.append(key, value);
+      };
+
+      Object.keys(productData).forEach(key => {
+        appendField(key, productData[key]);
       });
       
       if (imageFiles && imageFiles.length > 0) {

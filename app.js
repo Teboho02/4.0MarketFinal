@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+dotenv.config();
 
 // Routes
 import testRoutes from './routes/testRoutes.js';
@@ -12,6 +13,7 @@ import advertsRoutes from './routes/advertsRoutes.js';
 import yocoRoutes from './routes/yocoRoutes.js';
 import categoriesRoutes from './routes/categoriesRoutes.js';
 import suppliersRoutes from './routes/suppliersRoutes.js';
+import ordersRoutes from './routes/ordersRoutes.js';
 
 
 // Get __dirname equivalent for ES modules
@@ -20,14 +22,14 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
 }));
@@ -45,6 +47,7 @@ app.use('/api', advertsRoutes);
 app.use('/api', yocoRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/suppliers', suppliersRoutes);
+app.use('/api/orders', ordersRoutes);
 
 // Keep your existing root route for API testing
 app.get('/api', (req, res) => {

@@ -94,7 +94,7 @@ const Header = () => {
             <img
               src="/logo.jpg"
               alt="4Markets"
-              className="h-10 w-auto"
+              className="h-12 w-auto"
               onError={(e) => { e.target.style.display = 'none' }}
             />
           </Link>
@@ -222,7 +222,7 @@ const Header = () => {
               <img
                 src="/logo.jpg"
                 alt="4Markets"
-                className="h-10 w-auto"
+                className="h-12 w-auto"
                 onError={(e) => { e.target.style.display = 'none' }}
               />
             </Link>
